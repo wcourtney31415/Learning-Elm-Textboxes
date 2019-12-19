@@ -1,9 +1,9 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, div, input)
+import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 
 
 main =
@@ -11,32 +11,39 @@ main =
 
 
 type alias Model =
-    { username : String, password : String }
+    { txtUsername : String, txtPassword : String, outUsername : String, outPassword : String }
 
 
 init : Model
 init =
-    { username = "john@company.com", password = "B35tP@55W0RD" }
+    { txtUsername = "john@company.com", txtPassword = "B35tP@55W0RD", outUsername = "", outPassword = "" }
 
 
 type Msg
     = UsernameTextboxChange String
     | PasswordTextboxChange String
+    | GoButtonClicked
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         UsernameTextboxChange str ->
-            { model | username = str }
+            { model | txtUsername = str }
 
         PasswordTextboxChange str ->
-            { model | password = str }
+            { model | txtPassword = str }
+
+        GoButtonClicked ->
+            { model | outUsername = model.txtUsername, outPassword = model.txtPassword }
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ onInput UsernameTextboxChange, value model.username ] []
-        , input [ onInput PasswordTextboxChange, value model.password ] []
+        [ input [ onInput UsernameTextboxChange, value model.txtUsername ] []
+        , input [ onInput PasswordTextboxChange, value model.txtPassword ] []
+        , button [ onClick GoButtonClicked ] [ text "Go!" ]
+        , text ("User: " ++ model.outUsername)
+        , text (" Password: " ++ model.outPassword)
         ]
