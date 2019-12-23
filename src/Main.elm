@@ -1,9 +1,10 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (value)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import List
 
 
 main =
@@ -11,39 +12,67 @@ main =
 
 
 type alias Model =
-    { txtUsername : String, txtPassword : String, outUsername : String, outPassword : String }
+    { items : List Float
+    , itemPriceTextboxValue : String
+    , laborPriceTextboxValue : String
+    , total : Float
+    }
 
 
 init : Model
 init =
-    { txtUsername = "john@company.com", txtPassword = "B35tP@55W0RD", outUsername = "", outPassword = "" }
+    { items = []
+    , itemPriceTextboxValue = ""
+    , laborPriceTextboxValue = ""
+    , total = 0
+    }
 
 
 type Msg
-    = UsernameTextboxChange String
-    | PasswordTextboxChange String
-    | GoButtonClicked
+    = ItemPriceTextboxChange String
+    | AddButtonClicked
+    | LaborPriceTextboxChange String
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        UsernameTextboxChange str ->
-            { model | txtUsername = str }
+        AddButtonClicked ->
+            { model
+                | items = Maybe.withDefault -1 (String.toFloat model.itemPriceTextboxValue) :: model.items
+                , itemPriceTextboxValue = ""
+                , total = List.sum model.items + Maybe.withDefault -1 (String.toFloat model.itemPriceTextboxValue) * 1.07 + Maybe.withDefault -1000 (String.toFloat model.laborPriceTextboxValue)
+            }
 
-        PasswordTextboxChange str ->
-            { model | txtPassword = str }
+        ItemPriceTextboxChange str ->
+            { model | itemPriceTextboxValue = str }
 
-        GoButtonClicked ->
-            { model | outUsername = model.txtUsername, outPassword = model.txtPassword }
+        LaborPriceTextboxChange str ->
+            { model | laborPriceTextboxValue = str }
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ onInput UsernameTextboxChange, value model.txtUsername ] []
-        , input [ onInput PasswordTextboxChange, value model.txtPassword ] []
-        , button [ onClick GoButtonClicked ] [ text "Go!" ]
-        , text ("User: " ++ model.outUsername)
-        , text (" Password: " ++ model.outPassword)
+        [ div []
+            [ text "Labor: "
+            , input [ onInput LaborPriceTextboxChange, value model.laborPriceTextboxValue ] []
+            ]
+        , div []
+            [ text "Item Price: "
+            , input [ onInput ItemPriceTextboxChange, value model.itemPriceTextboxValue ] []
+            ]
+        , button [ onClick AddButtonClicked ] [ text "Add" ]
+        , renderList model.items
+        , text ("Total: " ++ String.fromFloat model.total)
         ]
+
+
+renderList : List Float -> Html msg
+renderList list =
+    ul [] (List.map renderLiElement list)
+
+
+renderLiElement : Float -> Html msg
+renderLiElement myFloat =
+    li [] [ text (String.fromFloat myFloat) ]
