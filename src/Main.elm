@@ -38,10 +38,23 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         AddButtonClicked ->
+            let
+                laborCost =
+                    Maybe.withDefault -1000 (String.toFloat model.laborPriceTextboxValue)
+
+                newItemCost =
+                    Maybe.withDefault -1 (String.toFloat model.itemPriceTextboxValue)
+
+                updatedItems =
+                    newItemCost :: model.items
+
+                totalPartsCost =
+                    List.sum updatedItems
+            in
             { model
-                | items = Maybe.withDefault -1 (String.toFloat model.itemPriceTextboxValue) :: model.items
+                | items = updatedItems
                 , itemPriceTextboxValue = ""
-                , total = List.sum model.items + Maybe.withDefault -1 (String.toFloat model.itemPriceTextboxValue) * 1.07 + Maybe.withDefault -1000 (String.toFloat model.laborPriceTextboxValue)
+                , total = totalPartsCost * 1.07 + laborCost
             }
 
         ItemPriceTextboxChange str ->
